@@ -10,16 +10,60 @@
 #endif
 
 #define CACHEPATH L"\\\\pdmwe\\AutoCAD\\SyncTest"
-
+#define SYNC_RATE 30000
 // The one and only application object
 
 CWinApp theApp;
 
 using namespace std;
 
+COfflineFilesClient	OfflineFilesClient;
+HANDLE  hSyncThread = NULL; 
+HANDLE	ghTerminateEvent = NULL; 
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
-	COfflineFilesClient	OfflineFilesClient;
+	if (! InitSyncClient() )
+	{
+		printf("Failed Initialising Sync Client\n\r");
+		OfflineFilesClient.Cleanup(); //This is called in the destructor but do it anyway
+		getchar();
+		return (1);
+	}
+	
+	// The Sync client is initiated now create a thread to run it in
+	if( ! SetConsoleCtrlHandler( (PHANDLER_ROUTINE) CtrlHandler, TRUE ) )
+	{
+		printf("Failed Adding Control Handler\n\r");
+		OfflineFilesClient.Cleanup(); //This is called in the destructor but do it anyway
+		getchar();
+		return (1);
+	}
+
+	hSyncThread = CreateThread(NULL,0,SyncThreadFunc,NULL,0,NULL); //Create the synchronisation thread
+	if (hSyncThread == NULL)
+	{
+		printf("Failed Creating The Sync thread\n\r");
+		SetConsoleCtrlHandler( (PHANDLER_ROUTINE) CtrlHandler, FALSE ); //Clear the control handler
+		OfflineFilesClient.Cleanup(); //This is called in the destructor but do it anyway
+		getchar();
+		return (1);
+	}
+
+	WaitForSingleObject(hSyncThread,INFINITE); // The program will wait here forever until the sync thread shuts down
+	printf("Sync Client is shutting Down\n\r");
+
+	hSyncThread = NULL;
+	SetConsoleCtrlHandler( (PHANDLER_ROUTINE) CtrlHandler, FALSE ); //Clear the control handler
+	OfflineFilesClient.Cleanup(); //This is called in the destructor but do it anyway
+	
+	getchar();
+	return (0);
+}
+
+
+BOOL InitSyncClient()
+{
 	BOOL bInitComplete = FALSE;
 
 	if ( !OfflineFilesClient.Init())
@@ -57,22 +101,41 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		printf("init failed\r\n");
 	}
 
-	//Initialisation is complete
-	//Create A thread to sync files every miute
-	//Create A thread to listen for keypresses at the command prompt
-	HANDLE syncThread = CreateThread(NULL,0,SyncThreadFunc,&OfflineFilesClient,0
-	getchar();
+	return bInitComplete;
+}
+DWORD WINAPI SyncThreadFunc( LPVOID lpParam ) 
+{
+	ghTerminateEvent = CreateEvent(NULL, TRUE, FALSE, TEXT("TerminateEvent") ); 
+	if (ghTerminateEvent == NULL) 
+    { 
+        printf("CreateEvent For Terminate Event failed (%d)\n", GetLastError());
+        return 0;
+    }
 
-	OfflineFilesClient.Cleanup(); //This is called in the destructor but do it anyway
+	while (FALSE)
+	{
+		DWORD dwResult = WaitForSingleObject(ghTerminateEvent,SYNC_RATE);
+		if (dwResult != WAIT_OBJECT_0)
+		{
+			//is a terminate event
+		}
+		OfflineFilesClient.Synchronise();
+
+	}
 	return 0;
 }
 
-DWORD WINAPI SyncThreadFunc( LPVOID lpParam ) 
-{
-}
-
-DWORD WINAPI ConsoleListenerThreadFunc( LPVOID lpParam)
-{
-}
+//Used to signal the sync thread to shutdown
+BOOL CtrlHandler( DWORD fdwCtrlType ) 
+{ 
+	if ( fdwCtrlType == CTRL_C_EVENT || fdwCtrlType == CTRL_BREAK_EVENT)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+} 
 
 

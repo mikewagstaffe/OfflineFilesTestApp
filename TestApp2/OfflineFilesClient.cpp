@@ -378,4 +378,9 @@ void COfflineFilesClient::Cleanup(void)
 		m_pOfflineFilesCache = NULL;
 	}
 }
+
+BOOL COfflineFilesClient::Synchronise(void)
+{
+	return true;
+}
 	

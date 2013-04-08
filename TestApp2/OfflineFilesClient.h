@@ -22,6 +22,7 @@ public:
 	OFFLINEFILESCLIENT_INIT_STATE GetInitialiseState(void);
 	BOOL InitCache(LPCWSTR *ppszCachePath);
 	BOOL RegisterSyncEvents();
+	BOOL Synchronise();
 	void Cleanup(void);
 
 private:

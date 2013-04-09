@@ -36,6 +36,12 @@
     <ClInclude Include="OfflineFilesClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SyncConflictHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SyncProgressHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +54,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OfflineFilesClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SyncConflictHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SyncProgressHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

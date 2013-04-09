@@ -265,7 +265,7 @@ void COfflineFilesClient::PrintSettings(void)
 	pEnum = NULL;
 }
 
-BOOL COfflineFilesClient::RegisterSyncEvents()
+BOOL COfflineFilesClient::RegisterSyncEvents() //Might not need to look at events as Sync provides method to handle a sync conflict
 {
 	if (m_pOfflineFilesCache == NULL)
 	{
@@ -381,6 +381,23 @@ void COfflineFilesClient::Cleanup(void)
 
 BOOL COfflineFilesClient::Synchronise(void)
 {
+	if (m_pOfflineFilesCache == NULL)
+	{
+		// The Cache Has Not been initialised
+		return (FALSE);
+	}
+
+	m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
+								&m_pszCachePath,	//The path of our folder
+								1,					//1 folder in the list
+								TRUE,			//Run Asynchronously
+								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + //Control Flags
+								OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
+								(IOfflineFilesSyncConflictHandler*) &m_pOfflineFilesConflictHandler,
+								(IOfflineFilesSyncProgress  *) m_OfflineFilesProgressHandler,
+								NULL);				//Don't want to automatically handle cnflicts
+								
+								
 	printf("sync called\n\r");
 	return true;
 }

@@ -12,6 +12,8 @@ enum OFFLINEFILESCLIENT_INIT_STATE
 #include <cscobj.h>
 
 #include "OfflineFilesEvents.h"
+#include "SyncConflictHandler.h"
+#include "SyncProgressHandler.h"
 
 class COfflineFilesClient
 {
@@ -43,6 +45,10 @@ private:
 	IOfflineFilesCache *m_pOfflineFilesCache;
 	BOOL m_bCacheable;
 	OFFLINEFILES_CACHING_MODE m_ShareCachingMode;
+
+	//Sync Members
+	 CSyncConflictHandler m_pOfflineFilesConflictHandler;
+	 CSyncProgressHandler m_OfflineFilesProgress;
 
 	//Events Members
 	IConnectionPoint  *m_pIConnectionPoint;

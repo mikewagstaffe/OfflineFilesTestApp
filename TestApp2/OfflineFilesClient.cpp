@@ -381,6 +381,7 @@ void COfflineFilesClient::Cleanup(void)
 
 BOOL COfflineFilesClient::Synchronise(void)
 {
+	printf("sync called\n\r");
 	return true;
 }
 	

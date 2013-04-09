@@ -50,6 +50,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		return (1);
 	}
 
+	printf("Waiting For Sync Client To Shut Down\n\r");
 	WaitForSingleObject(hSyncThread,INFINITE); // The program will wait here forever until the sync thread shuts down
 	printf("Sync Client is shutting Down\n\r");
 
@@ -112,16 +113,20 @@ DWORD WINAPI SyncThreadFunc( LPVOID lpParam )
         return 0;
     }
 
-	while (FALSE)
+	while (TRUE)
 	{
 		DWORD dwResult = WaitForSingleObject(ghTerminateEvent,SYNC_RATE);
-		if (dwResult != WAIT_OBJECT_0)
+		if (dwResult == WAIT_OBJECT_0)
 		{
 			//is a terminate event
+			printf("Thread Terminate Received\n\r");
+			break;
 		}
 		OfflineFilesClient.Synchronise();
 
 	}
+
+	CloseHandle(ghTerminateEvent);
 	return 0;
 }
 
@@ -130,6 +135,12 @@ BOOL CtrlHandler( DWORD fdwCtrlType )
 { 
 	if ( fdwCtrlType == CTRL_C_EVENT || fdwCtrlType == CTRL_BREAK_EVENT)
 	{
+		if ( !SetEvent(ghTerminateEvent) ) 
+		{
+			//Failed to set the event so need to forcibly terminate the thread
+			TerminateThread(hSyncThread,0);
+			hSyncThread=NULL;
+		}
 		return true;
 	}
 	else

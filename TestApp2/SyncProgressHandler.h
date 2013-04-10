@@ -7,13 +7,18 @@ public:
 	CSyncProgressHandler(void);
 	~CSyncProgressHandler(void);
 
-	HRESULT SyncItemBegin(LPCWSTR pszFile, OFFLINEFILES_OP_RESPONSE *pResponse);
-	HRESULT SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse);
+	//IOfflineFilesSyncProgress Methods
+	HRESULT STDMETHODCALLTYPE SyncItemBegin(LPCWSTR pszFile, OFFLINEFILES_OP_RESPONSE *pResponse);
+	HRESULT STDMETHODCALLTYPE SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse);
 
+	HRESULT STDMETHODCALLTYPE Begin(BOOL *pbAbort);
+	HRESULT STDMETHODCALLTYPE End(HRESULT hrResult);
+	HRESULT STDMETHODCALLTYPE QueryAbort(BOOL *pbAbort);
 
-	HRESULT QueryInterface (REFIID   riid, LPVOID * ppvObj);
-	ULONG AddRef();
-	ULONG Release();
+	//IUnknown Methods
+	HRESULT STDMETHODCALLTYPE QueryInterface (REFIID   riid, LPVOID * ppvObj);
+	ULONG STDMETHODCALLTYPE AddRef();
+	ULONG STDMETHODCALLTYPE Release();
 private:
 	ULONG m_cRef;
 };

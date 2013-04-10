@@ -2,7 +2,7 @@
 
 #include <cscobj.h>
 
-class COfflineFilesEvents : IOfflineFilesEvents, IOfflineFilesEventsFilter
+class COfflineFilesEvents : IOfflineFilesEvents//, IOfflineFilesEventsFilter
 {
 public:
 	COfflineFilesEvents(void);
@@ -204,7 +204,7 @@ public:
 	// End IOfflineFileEvents Methods
 
 	//IOfflineFileEventFilters Methods
-	virtual HRESULT STDMETHODCALLTYPE GetPathFilter( LPWSTR *ppszFilter, OFFLINEFILES_PATHFILTER_MATCH *pMatch)
+	/*virtual HRESULT STDMETHODCALLTYPE GetPathFilter( LPWSTR *ppszFilter, OFFLINEFILES_PATHFILTER_MATCH *pMatch)
 	{
 		return E_NOTIMPL;
 	}
@@ -217,7 +217,7 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE GetExcludedEvents( ULONG cElements, OFFLINEFILES_EVENTS *prgEvents, ULONG *pcEvents)
 	{
 		return E_NOTIMPL;
-	}
+	}*/
 
 	private:
 		DWORD m_dwRefCount;

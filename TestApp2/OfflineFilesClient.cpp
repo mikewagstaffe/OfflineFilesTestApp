@@ -87,6 +87,8 @@ BOOL COfflineFilesClient::Init(void)
 		return (TRUE);
 	}
 
+	printf("Creating Offline Files Progress Handler Instance\r\n");
+	
 	CoUninitialize();
 	return (FALSE);
 }
@@ -381,24 +383,26 @@ void COfflineFilesClient::Cleanup(void)
 
 BOOL COfflineFilesClient::Synchronise(void)
 {
+	printf("sync called\n\r");
 	if (m_pOfflineFilesCache == NULL)
 	{
 		// The Cache Has Not been initialised
 		return (FALSE);
 	}
+	 CSyncConflictHandler *pOfflineFilesConflictHandler = new CSyncConflictHandler;
+	 CSyncProgressHandler *pOfflineFilesProgress = new CSyncProgressHandler;
 
-	m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
-								&m_pszCachePath,	//The path of our folder
-								1,					//1 folder in the list
-								TRUE,			//Run Asynchronously
-								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + //Control Flags
-								OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
-								(IOfflineFilesSyncConflictHandler*) &m_pOfflineFilesConflictHandler,
-								(IOfflineFilesSyncProgress  *) m_OfflineFilesProgressHandler,
-								NULL);				//Don't want to automatically handle cnflicts
+	HRESULT hrResult =m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
+								&m_pszCachePath,		//The path of our folder
+								1,						//1 folder in the list
+								FALSE,					//Run Asynchronously
+								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + + OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS,// + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
+								(IOfflineFilesSyncConflictHandler*) pOfflineFilesConflictHandler,						//Conflict Handler
+								(IOfflineFilesSyncProgress  *) pOfflineFilesProgress,										//Progress Handler
+								NULL);				
 								
 								
-	printf("sync called\n\r");
+	printf("sync returned(%d): %d\n\r",S_OK,hrResult);
 	return true;
 }
 	

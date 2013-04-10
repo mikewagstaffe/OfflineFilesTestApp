@@ -12,16 +12,43 @@ CSyncProgressHandler::~CSyncProgressHandler(void)
 {
 }
 
-HRESULT CSyncProgressHandler::SyncItemBegin(LPCWSTR pszFile, OFFLINEFILES_OP_RESPONSE *pResponse)
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemBegin(LPCWSTR pszFile, OFFLINEFILES_OP_RESPONSE *pResponse)
 {
+	wprintf(L"SyncItemBegin: %s\n\r",pszFile);
+	 *pResponse = OFFLINEFILES_OP_CONTINUE;
+	return S_OK;
 }
 
-HRESULT CSyncProgressHandler::SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse)
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse)
 {
+	wprintf(L"SyncItemResult Result is: :%d file is%s\n\r",hrResult, pszFile);
+	 *pResponse = OFFLINEFILES_OP_CONTINUE;
+	return S_OK;
 }
 
 
-HRESULT CSyncProgressHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::Begin(BOOL *pbAbort)
+{
+	printf("Progress Handler Begin Called\n\r");
+
+	*pbAbort = FALSE;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::End(HRESULT hrResult)
+{
+	printf("Progress Handler End Called Result:%d\n\r",hrResult);
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::QueryAbort(BOOL *pbAbort)
+{
+	printf("Progress Handler QueryAbort Called\n\r");
+	*pbAbort = FALSE;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSyncProgressHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
 {
     // Always set out parameter to NULL, validating it first.
     if (!ppvObj)
@@ -39,12 +66,12 @@ HRESULT CSyncProgressHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
     return E_NOINTERFACE;
 }
 
-ULONG CSyncProgressHandler::AddRef()
+ULONG STDMETHODCALLTYPE CSyncProgressHandler::AddRef()
 {
     InterlockedIncrement(&m_cRef);
     return m_cRef;
 }
-ULONG CSyncProgressHandler::Release()
+ULONG STDMETHODCALLTYPE CSyncProgressHandler::Release()
 {
     // Decrement the object's internal counter.
     ULONG ulRefCount = InterlockedDecrement(&m_cRef);

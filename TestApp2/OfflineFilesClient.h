@@ -47,8 +47,8 @@ private:
 	OFFLINEFILES_CACHING_MODE m_ShareCachingMode;
 
 	//Sync Members
-	 CSyncConflictHandler m_pOfflineFilesConflictHandler;
-	 CSyncProgressHandler m_OfflineFilesProgress;
+	 CSyncConflictHandler *m_pOfflineFilesConflictHandler;
+	 CSyncProgressHandler *m_OfflineFilesProgress;
 
 	//Events Members
 	IConnectionPoint  *m_pIConnectionPoint;

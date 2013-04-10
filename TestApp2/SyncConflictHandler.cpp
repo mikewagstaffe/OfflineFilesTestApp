@@ -11,11 +11,15 @@ CSyncConflictHandler::~CSyncConflictHandler(void)
 {
 }
 
-HRESULT CSyncConflictHandler::ResolveConflict(LPCWSTR pszPath, DWORD fStateKnown, OFFLINEFILES_SYNC_STATE state, DWORD fChangeDetails, OFFLINEFILES_SYNC_CONFLICT_RESOLVE *pConflictResolution,LPWSTR *ppszNewName)
+HRESULT STDMETHODCALLTYPE CSyncConflictHandler::ResolveConflict(LPCWSTR pszPath, DWORD fStateKnown, OFFLINEFILES_SYNC_STATE state, DWORD fChangeDetails, OFFLINEFILES_SYNC_CONFLICT_RESOLVE *pConflictResolution,LPWSTR *ppszNewName)
 {
+	wprintf(L"Conflict Occured Just Log for now: %s\n\r",pszPath);
+
+	*pConflictResolution = OFFLINEFILES_SYNC_CONFLICT_RESOLVE_LOG; //For now just log
+	return S_OK;
 }
 
-HRESULT CSyncConflictHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
+HRESULT STDMETHODCALLTYPE CSyncConflictHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
 {
     // Always set out parameter to NULL, validating it first.
     if (!ppvObj)
@@ -33,12 +37,12 @@ HRESULT CSyncConflictHandler::QueryInterface (REFIID   riid, LPVOID * ppvObj)
     return E_NOINTERFACE;
 }
 
-ULONG CSyncConflictHandler::AddRef()
+ULONG STDMETHODCALLTYPE CSyncConflictHandler::AddRef()
 {
     InterlockedIncrement(&m_cRef);
     return m_cRef;
 }
-ULONG CSyncConflictHandler::Release()
+ULONG STDMETHODCALLTYPE CSyncConflictHandler::Release()
 {
     // Decrement the object's internal counter.
     ULONG ulRefCount = InterlockedDecrement(&m_cRef);

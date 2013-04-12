@@ -25,7 +25,7 @@ COfflineFilesClient::~COfflineFilesClient(void)
 
 BOOL COfflineFilesClient::Init(void)
 {
-	HRESULT hr = CoInitialize(NULL); 
+	HRESULT hr = CoInitializeEx(NULL,COINITBASE_MULTITHREADED); 
 	if (hr != S_OK)
 	{
 		printf("Failed To initialise COM \r\n");
@@ -391,18 +391,17 @@ BOOL COfflineFilesClient::Synchronise(void)
 	}
 	 CSyncConflictHandler *pOfflineFilesConflictHandler = new CSyncConflictHandler;
 	 CSyncProgressHandler *pOfflineFilesProgress = new CSyncProgressHandler;
-
-	HRESULT hrResult =m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
+	HRESULT hrResult = m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
 								&m_pszCachePath,		//The path of our folder
 								1,						//1 folder in the list
 								FALSE,					//Run Asynchronously
-								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + + OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS,// + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
-								(IOfflineFilesSyncConflictHandler*) pOfflineFilesConflictHandler,						//Conflict Handler
-								(IOfflineFilesSyncProgress  *) pOfflineFilesProgress,										//Progress Handler
+								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT, // + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
+								NULL,						//Conflict Handler
+								NULL,										//Progress Handler
 								NULL);				
 								
 								
-	printf("sync returned(%d): %d\n\r",S_OK,hrResult);
+	printf("sync returned(%d): %X\n\r",S_OK,hrResult);
 	return true;
 }
 	

@@ -14,14 +14,14 @@ CSyncProgressHandler::~CSyncProgressHandler(void)
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemBegin(LPCWSTR pszFile, OFFLINEFILES_OP_RESPONSE *pResponse)
 {
-	wprintf(L"SyncItemBegin: %s\n\r",pszFile);
+	//wprintf(L"SyncItemBegin: %s\n\r",pszFile);
 	 *pResponse = OFFLINEFILES_OP_CONTINUE;
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse)
 {
-	wprintf(L"SyncItemResult Result is: :%d file is%s\n\r",hrResult, pszFile);
+	//wprintf(L"SyncItemResult Result is: :%d file is%s\n\r",hrResult, pszFile);
 	 *pResponse = OFFLINEFILES_OP_CONTINUE;
 	return S_OK;
 }
@@ -29,7 +29,7 @@ HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemResult(LPCWSTR pszFile, 
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::Begin(BOOL *pbAbort)
 {
-	printf("Progress Handler Begin Called\n\r");
+	//printf("Progress Handler Begin Called\n\r");
 
 	*pbAbort = FALSE;
 	return S_OK;
@@ -37,13 +37,13 @@ HRESULT STDMETHODCALLTYPE CSyncProgressHandler::Begin(BOOL *pbAbort)
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::End(HRESULT hrResult)
 {
-	printf("Progress Handler End Called Result:%d\n\r",hrResult);
+	//printf("Progress Handler End Called Result:%d\n\r",hrResult);
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::QueryAbort(BOOL *pbAbort)
 {
-	printf("Progress Handler QueryAbort Called\n\r");
+	//printf("Progress Handler QueryAbort Called\n\r");
 	*pbAbort = FALSE;
 	return S_OK;
 }

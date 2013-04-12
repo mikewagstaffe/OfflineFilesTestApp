@@ -9,7 +9,7 @@
 #define new DEBUG_NEW
 #endif
 
-#define CACHEPATH L"\\\\pdmwe\\AutoCAD\\SyncTest\\New Text Document.txt"//L"\\\\pdmwe\\AutoCAD\\SyncTest"
+#define CACHEPATH L"\\\\pdmwe\\AutoCAD\\SyncTest\\New Text Document.txt"//L"\\\\pdmwe\\AutoCAD\\SyncTest""\\\\ASSET-1256\\SyncShare\\New Text Document.txt"//
 #define SYNC_RATE 30000
 // The one and only application object
 
@@ -85,7 +85,7 @@ BOOL InitSyncClient()
 		}
 		else
 		{
-			OfflineFilesClient.RegisterSyncEvents();
+			//OfflineFilesClient.RegisterSyncEvents();
 			bInitComplete = TRUE;
 		}
 	}
@@ -107,11 +107,6 @@ BOOL InitSyncClient()
 }
 DWORD WINAPI SyncThreadFunc( LPVOID lpParam ) 
 {
-	HRESULT hr = CoInitialize(NULL); 
-	if (hr != S_OK)
-	{
-		printf("Failed To initialise COM \r\n");
-	}
 
 	ghTerminateEvent = CreateEvent(NULL, TRUE, FALSE, TEXT("TerminateEvent") ); 
 	if (ghTerminateEvent == NULL) 

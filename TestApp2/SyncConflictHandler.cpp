@@ -13,7 +13,7 @@ CSyncConflictHandler::~CSyncConflictHandler(void)
 
 HRESULT STDMETHODCALLTYPE CSyncConflictHandler::ResolveConflict(LPCWSTR pszPath, DWORD fStateKnown, OFFLINEFILES_SYNC_STATE state, DWORD fChangeDetails, OFFLINEFILES_SYNC_CONFLICT_RESOLVE *pConflictResolution,LPWSTR *ppszNewName)
 {
-	wprintf(L"Conflict Occured Just Log for now: %s\n\r",pszPath);
+	//wprintf(L"Conflict Occured Just Log for now: %s\n\r",pszPath);
 
 	*pConflictResolution = OFFLINEFILES_SYNC_CONFLICT_RESOLVE_LOG; //For now just log
 	return S_OK;

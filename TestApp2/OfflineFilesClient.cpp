@@ -389,16 +389,25 @@ BOOL COfflineFilesClient::Synchronise(void)
 		// The Cache Has Not been initialised
 		return (FALSE);
 	}
-	 CSyncConflictHandler *pOfflineFilesConflictHandler = new CSyncConflictHandler;
-	 CSyncProgressHandler *pOfflineFilesProgress = new CSyncProgressHandler;
-	HRESULT hrResult = m_pOfflineFilesCache->Synchronize( NULL,			//No Window Handle
-								&m_pszCachePath,		//The path of our folder
-								1,						//1 folder in the list
-								FALSE,					//Run Asynchronously
-								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT, // + OFFLINEFILES_SYNC_CONTROL_FLAG_BACKGROUND,
-								NULL,						//Conflict Handler
-								NULL,										//Progress Handler
-								NULL);				
+	CSyncConflictHandler *pOfflineFilesConflictHandler = new CSyncConflictHandler;
+	CSyncProgressHandler *pOfflineFilesProgress = new CSyncProgressHandler;
+
+	//Get the current Logged in user - used for renaming files on conflict
+	DWORD  bufCharCount = UNLEN;
+	if(0 == GetUserName(pOfflineFilesConflictHandler->m_szUsername, &bufCharCount))
+	{
+		//If we did not get the user name then set it to user
+		_tcscpy_s(pOfflineFilesConflictHandler->m_szUsername,TEXT("USER"));
+	}
+	
+	HRESULT hrResult = m_pOfflineFilesCache->Synchronize( NULL,													//No Window Handle
+								&m_pszCachePath,																//The path of our folder
+								1,																				//1 folder in the list
+								FALSE,																			//Run Synchronously
+								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS, //Sync Options
+								pOfflineFilesConflictHandler,																			//Conflict Handler
+								pOfflineFilesProgress,																			//Progress Handler
+								NULL);																			//Sync ID
 								
 								
 	printf("sync returned(%d): %X\n\r",S_OK,hrResult);

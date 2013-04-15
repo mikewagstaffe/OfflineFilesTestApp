@@ -45,6 +45,11 @@ private:
 	IOfflineFilesCache *m_pOfflineFilesCache;
 	BOOL m_bCacheable;
 	OFFLINEFILES_CACHING_MODE m_ShareCachingMode;
+	IOfflineFilesDirectoryItem *m_pOfflineFilesItem;
+	IOfflineFilesConnectionInfo *m_pOfflineFilesConnecionInfo;
+
+	OFFLINEFILES_CONNECT_STATE m_CurentConnectState;
+	OFFLINEFILES_OFFLINE_REASON m_OfflineReason;
 
 	//Sync Members
 	 CSyncConflictHandler *m_pOfflineFilesConflictHandler;

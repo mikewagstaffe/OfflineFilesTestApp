@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "OfflineFilesClient.h"
 
+#define SYNC_OPTIONS OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN \
+					+ OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT \
+					+ OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS \
+					+ OFFLINEFILES_SYNC_CONTROL_FLAG_PINNEWFILES \
+					+ OFFLINEFILES_SYNC_CONTROL_FLAG_PINFORUSER
 
 COfflineFilesClient::COfflineFilesClient(void)
 {
@@ -8,7 +13,9 @@ COfflineFilesClient::COfflineFilesClient(void)
 	m_bIsOfflineFilesEnabled = FALSE;
 	m_bStartupReebotRequired = FALSE;
 	m_bCacheable=FALSE;
-	IOfflineFilesCache *m_pOfflineFilesCache = NULL;
+	m_pOfflineFilesCache = NULL;
+	m_pOfflineFilesItem = NULL;
+	m_pOfflineFilesConnecionInfo = NULL;
 	m_ShareCachingMode = OFFLINEFILES_CACHING_MODE_NONE;
 	m_pIConnectionPoint = NULL;
 	m_pOfflineFilesEvents = NULL;
@@ -139,6 +146,17 @@ BOOL COfflineFilesClient::InitCache(LPCWSTR *ppszCachePath)
 		return (FALSE);
 	}
 
+	//Get The Current State Of The Cache
+	m_pOfflineFilesCache->FindItem(m_pszCachePath,0,(IOfflineFilesItem**)&m_pOfflineFilesItem);
+	if(m_pOfflineFilesItem != NULL)
+	{
+		m_pOfflineFilesItem->QueryInterface(IID_IOfflineFilesConnectionInfo,(void**)&m_pOfflineFilesConnecionInfo);
+		m_pOfflineFilesConnecionInfo->GetConnectState(&m_CurentConnectState,&m_OfflineReason);
+	}
+	else
+	{
+		return(FALSE);
+	}
 	return (TRUE);
 }
 
@@ -404,7 +422,7 @@ BOOL COfflineFilesClient::Synchronise(void)
 								&m_pszCachePath,																//The path of our folder
 								1,																				//1 folder in the list
 								FALSE,																			//Run Synchronously
-								OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCIN + OFFLINEFILES_SYNC_CONTROL_FLAG_SYNCOUT + OFFLINEFILES_SYNC_CONTROL_FLAG_ASYNCPROGRESS, //Sync Options
+								SYNC_OPTIONS, //Sync Options
 								pOfflineFilesConflictHandler,																			//Conflict Handler
 								pOfflineFilesProgress,																			//Progress Handler
 								NULL);																			//Sync ID

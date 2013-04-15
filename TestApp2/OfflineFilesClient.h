@@ -35,12 +35,13 @@ private:
 	BOOL CacheStatus(void);
 private:
 	LPCWSTR m_pszCachePath;
+	BOOL m_bOfflineOnlineTranistionRequired;
 
 	//Initialisation Flags, current state of Offline files
 	BOOL m_bIsOfflineFilesActive;
 	BOOL m_bIsOfflineFilesEnabled;
 	BOOL m_bStartupReebotRequired;
-	
+
 	//Offline File Cache Members
 	IOfflineFilesCache *m_pOfflineFilesCache;
 	BOOL m_bCacheable;

@@ -22,6 +22,7 @@ COfflineFilesClient::COfflineFilesClient(void)
 	m_pSinkUnk = NULL;
 	m_dwAdvise = 0;
 	m_pszCachePath = NULL;
+	m_bOfflineOnlineTranistionRequired = FALSE;
 }
 
 
@@ -131,8 +132,14 @@ BOOL COfflineFilesClient::InitCache(LPCWSTR *ppszCachePath)
 	//Save the path as a member variable
 	size_t PathSize =  (wcslen (*ppszCachePath) + 1) * sizeof(wchar_t);
 	m_pszCachePath = (LPCWSTR) malloc(PathSize);
+	if (m_pszCachePath == NULL) 
+	{
+		printf("Failed To allocate Memory For Path Member");
+		return (FALSE);
+	}
+	
 	memcpy((void *)m_pszCachePath,*ppszCachePath,PathSize);
-
+	
 	//Print out data about Offline Files
 	PrintLocation();
 	PrintEncryptionStatus();
@@ -151,10 +158,16 @@ BOOL COfflineFilesClient::InitCache(LPCWSTR *ppszCachePath)
 	if(m_pOfflineFilesItem != NULL)
 	{
 		m_pOfflineFilesItem->QueryInterface(IID_IOfflineFilesConnectionInfo,(void**)&m_pOfflineFilesConnecionInfo);
+		if (m_pOfflineFilesConnecionInfo == NULL)
+		{
+			printf("Cannot Determine The State of path. ");
+			return (FALSE);
+		}
 		m_pOfflineFilesConnecionInfo->GetConnectState(&m_CurentConnectState,&m_OfflineReason);
 	}
 	else
 	{
+		printf("Failed to get Interface To Sync Item");
 		return(FALSE);
 	}
 	return (TRUE);
@@ -409,6 +422,8 @@ BOOL COfflineFilesClient::Synchronise(void)
 	}
 	CSyncConflictHandler *pOfflineFilesConflictHandler = new CSyncConflictHandler;
 	CSyncProgressHandler *pOfflineFilesProgress = new CSyncProgressHandler;
+	pOfflineFilesProgress->m_pCurentConnectState = &m_CurentConnectState;
+	pOfflineFilesProgress->m_pbOfflineOnlineTranistionReq = &m_bOfflineOnlineTranistionRequired;
 
 	//Get the current Logged in user - used for renaming files on conflict
 	DWORD  bufCharCount = UNLEN;
@@ -418,17 +433,64 @@ BOOL COfflineFilesClient::Synchronise(void)
 		_tcscpy_s(pOfflineFilesConflictHandler->m_szUsername,TEXT("USER"));
 	}
 	
-	HRESULT hrResult = m_pOfflineFilesCache->Synchronize( NULL,													//No Window Handle
-								&m_pszCachePath,																//The path of our folder
-								1,																				//1 folder in the list
-								FALSE,																			//Run Synchronously
-								SYNC_OPTIONS, //Sync Options
-								pOfflineFilesConflictHandler,																			//Conflict Handler
-								pOfflineFilesProgress,																			//Progress Handler
-								NULL);																			//Sync ID
+	HRESULT hrResult = m_pOfflineFilesCache->Synchronize( NULL,		//No Window Handle
+								&m_pszCachePath,					//The path of our folder
+								1,									//1 folder in the list
+								FALSE,								//Run Synchronously
+								SYNC_OPTIONS,						//Sync Options
+								pOfflineFilesConflictHandler,		//Conflict Handler
+								pOfflineFilesProgress,				//Progress Handler
+								NULL);								//Sync ID
 								
 								
 	printf("sync returned(%d): %X\n\r",S_OK,hrResult);
+
+	if (m_bOfflineOnlineTranistionRequired)
+	{
+		m_bOfflineOnlineTranistionRequired = FALSE;
+		printf("Need to run an Offline to online tranisition");
+
+		//The synchronise function indicates we need to tranistion to online
+		BOOL bTranistioncompleted = FALSE;
+		if (m_CurentConnectState == OFFLINEFILES_CONNECT_STATE_OFFLINE && 
+			(m_OfflineReason==OFFLINEFILES_OFFLINE_REASON_CONNECTION_FORCED || m_OfflineReason==OFFLINEFILES_OFFLINE_REASON_CONNECTION_SLOW )) //Check that we are offline and will be able to tranisition online
+		{
+			if(S_OK != m_pOfflineFilesConnecionInfo->TransitionOnline(NULL,0x0))
+			{
+				printf("Failed To Go Online\n\r");
+			}
+			
+			//update the connection state
+			m_pOfflineFilesConnecionInfo->GetConnectState(&m_CurentConnectState,&m_OfflineReason);
+			
+			if (m_CurentConnectState==OFFLINEFILES_CONNECT_STATE_ONLINE) //online so wait and then return to offline mode
+			{
+				Sleep(60000); //Wait 60 seconds to fetch all changes
+				
+			}
+			BOOL bOpenFilesPreventedTransition = FALSE;
+			if(S_OK != m_pOfflineFilesConnecionInfo->TransitionOffline(NULL,0x0,FALSE,&bOpenFilesPreventedTransition))
+			{
+				printf("Failed To Go Offline\n\r");
+				if (bOpenFilesPreventedTransition)
+				{
+					printf("Failed because a file is open\n\r");
+					Sleep(60000); //Wait another 60 seconds to fetch all changes
+					if(S_OK != m_pOfflineFilesConnecionInfo->TransitionOffline(NULL,0x0,TRUE,&bOpenFilesPreventedTransition)) //This time forcibly close any connections
+					{
+						printf("Failed To Go Offline\n\r");
+					}
+				}
+			}
+			//Refresh the current connection state
+			m_pOfflineFilesConnecionInfo->GetConnectState(&m_CurentConnectState,&m_OfflineReason);
+			if(bTranistioncompleted && m_CurentConnectState!=OFFLINEFILES_CONNECT_STATE_OFFLINE)
+			{
+				//somthing went wrong we completed a tranistion but are not offline
+				printf("Unknown Transition Error: Not Offline\n\r");
+			}
+		}		
+	}
 	return true;
 }
 	

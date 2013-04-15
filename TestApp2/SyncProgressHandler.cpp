@@ -21,8 +21,22 @@ HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemBegin(LPCWSTR pszFile, O
 
 HRESULT STDMETHODCALLTYPE CSyncProgressHandler::SyncItemResult(LPCWSTR pszFile, HRESULT hrResult, IOfflineFilesSyncErrorInfo *pErrorInfo, OFFLINEFILES_OP_RESPONSE *pResponse)
 {
-	//wprintf(L"SyncItemResult Result is: :%d file is%s\n\r",hrResult, pszFile);
-	 *pResponse = OFFLINEFILES_OP_CONTINUE;
+	if (hrResult!=S_OK && pErrorInfo !=NULL)
+	{
+		//An Error Must have occured
+		OFFLINEFILES_SYNC_OPERATION SyncOp;
+		pErrorInfo->GetSyncOperation(&SyncOp);
+		if (SyncOp == OFFLINEFILES_SYNC_OPERATION_CREATE_COPY_ON_CLIENT)
+		{
+			//The error occured trying to create a new item on hte client from the server
+			//signal the main control loop, that we need an offline to online tranistion to fix the problem
+			if (*m_pCurentConnectState == OFFLINEFILES_CONNECT_STATE_OFFLINE)
+			{
+				*m_pbOfflineOnlineTranistionReq = TRUE;
+			}
+		}
+	}
+	*pResponse = OFFLINEFILES_OP_CONTINUE;
 	return S_OK;
 }
 

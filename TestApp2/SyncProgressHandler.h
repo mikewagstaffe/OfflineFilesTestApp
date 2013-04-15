@@ -19,6 +19,10 @@ public:
 	HRESULT STDMETHODCALLTYPE QueryInterface (REFIID   riid, LPVOID * ppvObj);
 	ULONG STDMETHODCALLTYPE AddRef();
 	ULONG STDMETHODCALLTYPE Release();
+
+public:
+	OFFLINEFILES_CONNECT_STATE *m_pCurentConnectState;
+	BOOL *m_pbOfflineOnlineTranistionReq;
 private:
 	ULONG m_cRef;
 };
